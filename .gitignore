@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environments
+.env
+.env.local
+.venv/
+venv/
+
+# Local backups / temp
+*_backup.zip
+.extracted/
+*.tmp
+/tmp/
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

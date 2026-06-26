@@ -1,0 +1,6 @@
+interface:
+  display_name: "Search Science Literature"
+  short_description: "Search and review scientific papers"
+  default_prompt: "Use $search-science-literature to find, validate, rank, and summarize peer-reviewed scientific literature on my topic."
+policy:
+  allow_implicit_invocation: true
