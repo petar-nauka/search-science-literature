@@ -116,6 +116,16 @@ python scripts/build_review_table.py review.json --mode review > review.md
 
 ---
 
+## Подобрения и API ключове
+
+Виж **[IMPROVEMENTS.md](IMPROVEMENTS.md)** за пълен план:
+- ⏱️ кои безплатни API ключове да си вземеш (NCBI, CORE, Semantic Scholar, OpenAIRE)
+- 🔗 директни линкове към регистрационните форми и колко време отнема всеки
+- ➕ идеи за нови бази (ORCID, OpenCitations, Lens.org, Scite, CrossRef Event Data)
+- ⚙️ pipeline подобрения (embedding re-ranking, citation graph expansion, full-text extraction, cache layer)
+
+---
+
 ## Известни ограничения
 
 - **Semantic Scholar без API ключ**: shared pool е силно rate-limited (HTTP 429). Препоръчвам да зададеш `SEMANTIC_SCHOLAR_API_KEY` или да деактивираш с `--no-semantic-scholar`.
