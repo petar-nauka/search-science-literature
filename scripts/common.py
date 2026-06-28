@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -21,6 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from difflib import SequenceMatcher
+from pathlib import Path
 from typing import Any
 
 
@@ -182,6 +184,31 @@ def safe_request_text(*args: Any, retries: int = 2, sleep_seconds: float = 1.0, 
             if attempt < retries:
                 time.sleep(sleep_seconds * (attempt + 1))
     raise RuntimeError(f"Request failed after retries: {last_error}") from last_error
+
+
+def load_dotenv(paths: list[str | Path] | None = None) -> None:
+    """Load KEY=VALUE pairs from .env files without overriding existing env vars."""
+    candidate_paths = paths or [
+        Path.cwd() / ".env",
+        Path(__file__).resolve().parent.parent / ".env",
+    ]
+    for path_value in candidate_paths:
+        path = Path(path_value).expanduser()
+        if not path.exists() or not path.is_file():
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, value = stripped.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
 
 
 # ------------------------- author helpers ------------------------- #

@@ -26,7 +26,7 @@ CROSSREF_MAILTO=you@example.com
 UNPAYWALL_EMAIL=you@example.com
 ```
 
-Then either source it before running the scripts (`set -a; source .env; set +a`) or use `python-dotenv` to load it.
+The scripts load `.env` automatically; exported shell variables still take precedence.
 
 ---
 
@@ -65,6 +65,15 @@ Then either source it before running the scripts (`set -a; source .env; set +a`)
 - **Effect:** rate limit ~1 req/sec → ~10 req/sec. Without a key, the shared pool returns HTTP 429 in ~50% of calls.
 - **Env:** `SEMANTIC_SCHOLAR_API_KEY=<your-key>`
 - **Tip:** in the "use case" field, mention non-commercial / personal research / literature review usage — non-commercial applicants are routinely approved.
+
+### 5. Web of Science Starter API — credentialed metadata validation
+
+- **URL:** https://developer.clarivate.com/apis/wos-starter
+- **Steps:** create a Clarivate Developer Portal account → register an application → subscribe it to Web of Science Starter API → wait for key/approval
+- **Effect:** enables `scripts/search_wos_starter.py` for DOI, author, source-title, and bibliographic metadata checks. Some plans can return `times cited`; trial plans may omit it.
+- **Env:** `WOS_STARTER_API_KEY=<your-key>`
+- **Usage:** add `--include-wos-starter` to the orchestrator or call `python scripts/search_wos_starter.py --doi "<doi>"`
+- **Quota note:** Free Trial quotas can be low, so the script caches responses and throttles paginated live calls to 1 req/sec.
 
 ---
 

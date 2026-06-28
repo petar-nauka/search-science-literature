@@ -180,6 +180,23 @@ The skill normalizes every retrieved record into this schema:
 | `attributes.descriptions[0].description` | `abstract` |
 | `attributes.citationCount` | `citations` |
 
+### Web of Science Starter API
+
+| WoS Starter field | Canonical |
+|---|---|
+| `uid` | `source_ids.WebOfScienceStarter` |
+| `title` | `title` |
+| `source.publishYear` | `year` |
+| `source.publishYear` + `source.publishMonth` | `publication_date` |
+| `source.sourceTitle` | `venue` |
+| `identifiers.issn` + `identifiers.eissn` | `issn` |
+| `identifiers.doi` | `doi` |
+| `identifiers.pmid` | `pmid` |
+| `names.authors[].displayName` or `wosStandard` | `authors` |
+| `types[]` | `article_type` |
+| `citations[].count` | `citations` when present in the subscribed plan |
+| `keywords.authorKeywords[]` + `keywordsPlus[]` | `concepts` |
+
 ### Unpaywall (enrichment, not primary search)
 
 | Unpaywall field | Canonical |

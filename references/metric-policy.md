@@ -9,6 +9,7 @@ If it cannot be verified, write `недостъпно`.
 
 Treat citation counts as dynamic.
 Use them as supportive evidence, not as the only ranking signal.
+Web of Science Starter `times cited` may be unavailable on trial plans; report it only when the API response includes a count.
 
 ## Influence
 

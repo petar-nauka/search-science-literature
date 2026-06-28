@@ -9,7 +9,8 @@ Pipeline:
 5. Emit a single merged JSON with audit trail.
 
 Sources default ON:  OpenAlex, Crossref, Semantic Scholar, Europe PMC, PubMed.
-Toggle flags add:    arXiv, DBLP, DOAJ, CORE, OpenAIRE, DataCite, bioRxiv.
+Toggle flags add:    arXiv, DBLP, DOAJ, CORE, OpenAIRE, DataCite, bioRxiv,
+                     Web of Science Starter (credentialed).
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from common import add_output_argument, dump_json
+from common import add_output_argument, dump_json, load_dotenv
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -101,6 +102,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--include-openaire", action="store_true")
     parser.add_argument("--include-datacite", action="store_true")
     parser.add_argument("--include-biorxiv", action="store_true")
+    parser.add_argument("--include-wos-starter", action="store_true", help="Enable Web of Science Starter API")
+    parser.add_argument("--wos-db", default="WOS", help="WoS Starter database, e.g. WOS, MEDLINE, PPRN")
+    parser.add_argument("--wos-api-version", choices=["v1", "v2"], default=os.getenv("WOS_STARTER_API_VERSION", "v1"))
+    parser.add_argument("--wos-max-pages", type=int, default=1, help="Extra WoS Starter pagination pages")
     parser.add_argument("--include-semantic-scholar", action="store_true", default=True)
     parser.add_argument("--no-semantic-scholar", action="store_true", help="Disable Semantic Scholar (e.g. when rate-limited)")
     parser.add_argument("--check-retractions", action="store_true", help="Cross-check retractions after dedup")
@@ -131,6 +136,7 @@ def build_search_query(expansion: dict, original: str) -> str:
 
 
 def main() -> None:
+    load_dotenv()
     args = parse_args()
     expansion = expand(args)
     search_query = (
@@ -186,6 +192,21 @@ def main() -> None:
             print("⚠ CORE skipped — set CORE_API_KEY to enable.", file=sys.stderr)
     if args.include_openaire:
         jobs.append(("search_openaire.py", ["--query", plain_query, "--limit", str(args.limit)]))
+    if args.include_wos_starter:
+        if os.getenv("WOS_STARTER_API_KEY"):
+            jobs.append((
+                "search_wos_starter.py",
+                with_sort_plain(
+                    "--db",
+                    args.wos_db,
+                    "--api-version",
+                    args.wos_api_version,
+                    "--max-pages",
+                    str(args.wos_max_pages),
+                ),
+            ))
+        else:
+            print("Warning: Web of Science Starter skipped - set WOS_STARTER_API_KEY to enable.", file=sys.stderr)
 
     # Fan out — bounded thread pool so we don't hammer any single host
     record_files: list[str] = []

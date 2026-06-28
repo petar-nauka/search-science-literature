@@ -33,12 +33,12 @@ The skill fans out across **open scholarly APIs** and is robust to any one sourc
 
 ## Tier 4 — Paywalled / entitlement-based (not queried by default)
 
-- Web of Science
+- Web of Science Starter API (`scripts/search_wos_starter.py`, enabled with `--include-wos-starter` and `WOS_STARTER_API_KEY`)
 - Scopus
 - ScienceDirect
 - IEEE Xplore
 
-If the user explicitly asks for one of these and the environment cannot access it, say so in one sentence and continue with the strongest open evidence. Never scrape paywalled sites.
+Keep Web of Science Starter off by default because free trial plans can be quota-limited. Use it for DOI, author, source-title, and bibliographic metadata checks; report `times cited` only when the subscribed response includes citation counts. If the user explicitly asks for another entitlement-based source and the environment cannot access it, say so in one sentence and continue with the strongest open evidence. Never scrape paywalled sites.
 
 ## Reliability order for metadata conflicts
 
@@ -47,12 +47,13 @@ When two sources disagree on a field, prefer in this order:
 1. Publisher DOI landing page (resolved via `https://doi.org/<doi>`)
 2. PubMed or Europe PMC (peer-review record)
 3. Crossref (DOI registration record)
-4. OpenAlex (aggregated)
-5. Semantic Scholar (graph-derived)
-6. Unpaywall (OA location only)
-7. CORE / OpenAIRE / DOAJ (repository + index pages)
-8. arXiv / bioRxiv / DBLP (preprint or domain-specific index)
-9. Anything else
+4. Web of Science Starter (credentialed bibliographic/citation metadata when available)
+5. OpenAlex (aggregated)
+6. Semantic Scholar (graph-derived)
+7. Unpaywall (OA location only)
+8. CORE / OpenAIRE / DOAJ (repository + index pages)
+9. arXiv / bioRxiv / DBLP (preprint or domain-specific index)
+10. Anything else
 
 ## Default retrieval mix
 

@@ -1,6 +1,6 @@
 ---
 name: search-science-literature
-description: Search, validate, rank, and synthesize peer-reviewed scientific literature across open scholarly APIs (OpenAlex, Crossref, PubMed, Europe PMC, Semantic Scholar, arXiv, DOAJ, bioRxiv, CORE, OpenAIRE, DataCite, DBLP, Unpaywall). Use for literature reviews, state-of-the-art / related-work summaries, newest papers by topic, gap analyses, DOI-validated reading lists, systematic-review starter sets, citation-graph exploration, evidence-based research overviews, open-access discovery. Triggers (BG/EN): "литературен преглед", "научни статии за", "последни публикации", "state of the art", "review of", "papers on", "DOI for", "newest articles", "статии за PEM електролиза". Multilingual — accepts Bulgarian or English and normalizes the search intent to English scientific terms. Never hallucinates papers, DOIs, venues, or metrics — every claim is traceable to a queried API and falls back to "недостъпно" when a field cannot be verified.
+description: Use when Codex must search, validate, rank, or synthesize scientific literature using open scholarly APIs and optional credentialed Web of Science Starter API. Trigger for literature reviews, state of the art, related work, newest papers, DOI/PMID/author/source-title checks, citation-aware reading lists, systematic-review starter sets, open-access discovery, "литературен преглед", "научни статии", and Web of Science metadata/times-cited validation. Accepts Bulgarian or English and must not invent papers, DOIs, venues, or metrics.
 ---
 
 # Search Science Literature
@@ -8,7 +8,7 @@ description: Search, validate, rank, and synthesize peer-reviewed scientific lit
 ## Overview
 
 Find and organize trustworthy scientific literature **without hallucinating** papers, DOIs, venues, or metrics.
-Prefer open scholarly APIs first, keep the workflow auditable, state access or metadata limits explicitly.
+Prefer open scholarly APIs first. Use credentialed sources such as Web of Science Starter only when explicitly requested or enabled by credentials and quota. Keep the workflow auditable and state access or metadata limits explicitly.
 
 The skill is **deterministic**: Python scripts in `scripts/` handle every retrieval, normalization, deduplication, and ranking step. The model's job is orchestration, query design, gap analysis, and narrative synthesis — not invention.
 
@@ -75,7 +75,9 @@ Read [references/source-priority.md](references/source-priority.md) first.
 
 ### Tier 4 — paywalled (not fetched, declared if asked)
 
-Web of Science, Scopus, ScienceDirect, IEEE Xplore. If the user requests one and the environment lacks credentials, say so in one sentence and continue with the strongest open evidence.
+Web of Science Starter API is supported as an optional credentialed source via `--include-wos-starter` and `WOS_STARTER_API_KEY`. Keep it off by default because free trial quota is small.
+
+Scopus, ScienceDirect, IEEE Xplore, and other entitlement-based sources are not queried unless a script and credentials are available. If the user requests one and the environment cannot access it, say so in one sentence and continue with the strongest open evidence.
 
 **Never** scrape Google Scholar or other unofficial paths.
 
@@ -119,6 +121,7 @@ Supporting tools:
 - Tier-1 search: [`scripts/search_openalex.py`](scripts/search_openalex.py), [`scripts/search_crossref.py`](scripts/search_crossref.py), [`scripts/search_semantic_scholar.py`](scripts/search_semantic_scholar.py)
 - Domain search: [`scripts/search_pubmed.py`](scripts/search_pubmed.py), [`scripts/search_europepmc.py`](scripts/search_europepmc.py), [`scripts/search_arxiv.py`](scripts/search_arxiv.py), [`scripts/search_dblp.py`](scripts/search_dblp.py), [`scripts/search_biorxiv.py`](scripts/search_biorxiv.py)
 - OA + verification: [`scripts/search_doaj.py`](scripts/search_doaj.py), [`scripts/search_core.py`](scripts/search_core.py), [`scripts/search_openaire.py`](scripts/search_openaire.py), [`scripts/search_datacite.py`](scripts/search_datacite.py), [`scripts/enrich_unpaywall.py`](scripts/enrich_unpaywall.py), [`scripts/check_retractions.py`](scripts/check_retractions.py)
+- Credentialed sources: [`scripts/search_wos_starter.py`](scripts/search_wos_starter.py) for Web of Science Starter API when `WOS_STARTER_API_KEY` is set
 - Post-processing: [`scripts/validate_identifiers.py`](scripts/validate_identifiers.py), [`scripts/merge_dedup_rank.py`](scripts/merge_dedup_rank.py), [`scripts/build_review_table.py`](scripts/build_review_table.py)
 - Exports: [`scripts/export_bibtex.py`](scripts/export_bibtex.py), [`scripts/export_ris.py`](scripts/export_ris.py), [`scripts/export_csv.py`](scripts/export_csv.py)
 
@@ -145,6 +148,16 @@ python scripts/search_orchestrator.py \
 python scripts/search_orchestrator.py \
     --query "lithium-ion battery thermal runaway" \
     --sort systematic-review --from-year 2020 --output /tmp/li_sr.json
+
+# Include Web of Science Starter API when credentials and quota are available
+python scripts/search_orchestrator.py \
+    --query "PEM electrolysis efficiency" \
+    --from-year 2022 --limit 25 --sort relevance \
+    --include-wos-starter --output /tmp/lit_search_wos.json
+
+# DOI check through Web of Science Starter API
+python scripts/search_wos_starter.py \
+    --doi "10.1038/nphys1170" --pretty
 
 # Export final reading list
 python scripts/export_bibtex.py /tmp/lit_search.json --output reading.bib
@@ -173,6 +186,9 @@ python scripts/build_review_table.py /tmp/lit_search.json --mode review > review
 | `CORE_API_KEY` | CORE v3 API | CORE skipped with a one-line note |
 | `SEMANTIC_SCHOLAR_API_KEY` | higher rate limits | shared free tier |
 | `NCBI_API_KEY` | higher PubMed rate limits | 3 req/sec shared limit |
+| `WOS_STARTER_API_KEY` | Web of Science Starter API | WoS Starter skipped unless explicitly called |
+| `WOS_STARTER_API_VERSION` | `v1` or `v2` endpoint | `v1` |
+| `WOS_STARTER_CACHE_DIR` | cache path for WoS Starter responses | user cache directory |
 
 Set them in `.env` (already gitignored by the project CLAUDE.md convention).
 

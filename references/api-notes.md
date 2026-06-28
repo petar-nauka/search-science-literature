@@ -95,6 +95,17 @@ Per-source quirks, rate limits, and "gotchas" the scripts already handle. Keep t
 - Indexes DOIs for datasets, software, and other research artifacts.
 - Citation count via `citation-count`; type via `attributes.types.resourceTypeGeneral` (Dataset, Software, Audiovisual, etc.).
 
+## Web of Science Starter API
+
+- Official docs: https://developer.clarivate.com/apis/wos-starter and Swagger definition at `https://developer.clarivate.com/apis/wos-starter/swagger`.
+- Base endpoint: `https://api.clarivate.com/apis/wos-starter/v1/documents`; `v2` is also supported by `--api-version v2`.
+- Auth: set `WOS_STARTER_API_KEY`; the script sends `X-ApiKey: <key>` and `Accept: application/json`.
+- Query parameter: `q` uses Web of Science field tags. DOI lookup is `DO=<doi>`. Plain `--query` values are wrapped as `TS=(...)`; pass `--raw-query` for advanced queries.
+- Supported filters in the script: `--doi`, `--author` (`AU`), `--source-title` (`SO`), `--from-year`/`--to-year` via `publishTimeSpan`, `--db`, `--limit`, `--page`, `--max-pages`.
+- API limit per request is 1-50 records. Free Trial plans are commonly 1 request/sec and low daily quota, so the script throttles paginated live requests to 1 req/sec and caches responses.
+- Cache: default is the user cache directory; override with `WOS_STARTER_CACHE_DIR`, adjust with `--cache-ttl-hours`, or disable with `--no-cache`.
+- `times cited` is plan-dependent. Free Trial responses may omit citation counts; in that case leave `citations` as null and report `not available` / `недостъпно`.
+
 ## Retraction checks
 
 Two parallel paths:
